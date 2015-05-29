@@ -1,3 +1,50 @@
+I have forked this after making some enhancements and receiving no reply from Brad.  Hey Brad -- if you're out there, and you mayb ejust missed my email, please let me know!
+
+Anyway, I found that DLL injection is often aided by knowing a few more things about the target processes.  I sometimse want
+to know what the architecture is and what the desktop session ID is for a given process.  I've added these to the process
+listing feature that Brad had built into the original tool.  Here's a sample:
+
+    dllinjector -d	
+    
+    Foundstone DLL Injector v0.2 (x64)
+    brad.antoniewicz@foundstone.com
+    process listing enhancements by Josh Stone (yakovdk@gmail.com)
+    --------------------------------------------------------
+    [+] Dumping processes and PIDs..
+    	PID	Integrity	Desktop	Arch	Image
+    	---	---------	-------	----	-----
+    	[0]	n/a       	 1023	  ???	[System Process]
+    	[4]	n/a       	  0	  ???	System
+    	[284]	SYSTEM    	  0	64bit	smss.exe
+    	[396]	SYSTEM    	  0	64bit	csrss.exe
+    	[448]	SYSTEM    	  0	64bit	wininit.exe
+    	[456]	SYSTEM    	  1	64bit	csrss.exe
+    	[492]	SYSTEM    	  1	64bit	winlogon.exe
+    	[548]	SYSTEM    	  0	64bit	services.exe
+    	[564]	SYSTEM    	  0	64bit	lsass.exe
+    	[572]	SYSTEM    	  0	64bit	lsm.exe
+    	[680]	SYSTEM    	  0	64bit	svchost.exe
+    	[756]	SYSTEM    	  0	64bit	svchost.exe
+    	[816]	SYSTEM    	  0	64bit	svchost.exe
+    	[924]	SYSTEM    	  0	64bit	svchost.exe
+    	[960]	SYSTEM    	  0	64bit	svchost.exe
+    	[1012]	SYSTEM    	  0	64bit	svchost.exe
+    	[1140]	SYSTEM    	  0	64bit	svchost.exe
+    	[1244]	SYSTEM    	  0	64bit	spoolsv.exe
+    	[1276]	SYSTEM    	  0	64bit	svchost.exe
+    	[1420]	SYSTEM    	  0	64bit	mfemms.exe
+    	[1512]	SYSTEM    	  0	64bit	mfevtps.exe
+    	[1560]	SYSTEM    	  0	64bit	sqlwriter.exe
+    	[1604]	SYSTEM    	  0	64bit	vmtoolsd.exe
+    	[1656]	SYSTEM    	  0	32bit	wsnm.exe
+    	[1772]	SYSTEM    	  0	64bit	vmware-usbarbitrator64.exe
+    	[340]	SYSTEM    	  0	32bit	vmware-view-usbd.exe
+    	[1112]	HIGH      	  1	64bit	taskhost.exe
+    	[2124]	SYSTEM    	  0	64bit	TPAutoConnSvc.exe
+
+
+The following is the original README:
+
 DLLInjector v0.2
 brad.antoniewicz@foundstone.com
 --------------------------------------------------
