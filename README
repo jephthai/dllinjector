@@ -1,8 +1,11 @@
-I have forked this after making some enhancements and receiving no reply from Brad.  Hey Brad -- if you're out there, and you mayb ejust missed my email, please let me know!
+I have forked this after making some enhancements and receiving no reply from Brad.  
+Hey Brad -- if you're out there, and you maybe just missed my email, please let me 
+know!
 
-Anyway, I found that DLL injection is often aided by knowing a few more things about the target processes.  I sometimse want
-to know what the architecture is and what the desktop session ID is for a given process.  I've added these to the process
-listing feature that Brad had built into the original tool.  Here's a sample:
+Anyway, I found that DLL injection is often aided by knowing a few more things about 
+the target processes.  I sometimse want to know what the architecture is and what the 
+desktop session ID is for a given process.  I've added these to the process listing 
+feature that Brad had built into the original tool.  Here's a sample:
 
     dllinjector -d	
     
