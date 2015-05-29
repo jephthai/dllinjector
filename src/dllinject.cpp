@@ -49,7 +49,6 @@
 #define VERSION 0.2
 #define BUFSIZE 512
 
-
 int SetDebugPrivileges(void) { 
 	TOKEN_PRIVILEGES priv = {0};
 	HANDLE hToken = NULL; 
@@ -147,9 +146,79 @@ int injectDLL(HANDLE hTargetProcHandle, unsigned int injectMethod, LPTHREAD_STAR
 
 }
 
+void getIntegrity(DWORD pid, LPCSTR *out) {
+	HANDLE hProc;
+	HANDLE hToken;
+	DWORD length;
+	DWORD integrity;
+	PTOKEN_MANDATORY_LABEL label;
+
+	//_snprintf_s((char *)ilevel, 20, 20, "UNDEF");
+	*out = "UNDEF";
+	hProc = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
+	if (OpenProcessToken(hProc, TOKEN_QUERY, &hToken)) 
+	{
+		if (!GetTokenInformation(hToken, TokenIntegrityLevel, NULL, 0, &length)) 
+		{
+			if (GetLastError() == ERROR_INSUFFICIENT_BUFFER) 
+			{
+				label = (PTOKEN_MANDATORY_LABEL)LocalAlloc(0, length);
+				if (label != NULL) 
+				{
+					if (GetTokenInformation(hToken, TokenIntegrityLevel, label, length, &length)) 
+					{
+						integrity = *GetSidSubAuthority(label->Label.Sid,
+							(DWORD)(UCHAR)(*GetSidSubAuthorityCount(label->Label.Sid) - 1));
+						if (integrity >= SECURITY_MANDATORY_SYSTEM_RID)
+						{
+							*out = "SYSTEM"; 
+						}
+						else if (integrity >= SECURITY_MANDATORY_HIGH_RID)
+						{
+							*out = "HIGH"; 
+						}
+						else if (integrity >= SECURITY_MANDATORY_MEDIUM_RID)
+						{
+							*out = "MEDIUM";
+						}
+						else
+						{
+							*out = "LOW";
+						}
+					}
+				}
+			}
+		}
+	}
+	else 
+	{
+		*out = "n/a";
+	}
+}
+
+void bitness(DWORD pid, LPCSTR *out) {
+	HANDLE hProc;
+	HANDLE hToken;
+	int b;
+
+	hProc = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
+	if (OpenProcessToken(hProc, TOKEN_QUERY, &hToken)) {
+		IsWow64Process(hProc, &b);
+		*out = b ? "32bit" : "64bit";
+	}
+	else 
+	{
+		*out = "???";
+	}
+}
+
+
 void dumpProcs( void ) {
 	PROCESSENTRY32 pe32 = { sizeof(PROCESSENTRY32) } ;
 	HANDLE hSnapshot = CreateToolhelp32Snapshot( TH32CS_SNAPPROCESS, 0 );
+	DWORD session;
+	LPCSTR integrity;
+	LPCSTR bits;
 
 	printf("[+] Dumping processes and PIDs..\n");
 
@@ -161,9 +230,23 @@ void dumpProcs( void ) {
 		exit(-1);
 	}
 
+	printf("\tPID\tIntegrity\tDesktop\tArch\tImage\n");
+	printf("\t---\t---------\t-------\t----\t-----\n");
+
 	do {
-		printf("\t[%d]\t%s\n",pe32.th32ProcessID, pe32.szExeFile );
+		getIntegrity(pe32.th32ProcessID, &integrity);
+		ProcessIdToSessionId(pe32.th32ProcessID, &session);
+		bitness(pe32.th32ProcessID, &bits);
+		printf("\t[%d]\t%-10s\t% 3d\t%5s\t%s\n",pe32.th32ProcessID, integrity, session, bits, pe32.szExeFile);
 	} while( Process32Next( hSnapshot, &pe32 ) );
+
+	HANDLE cProc = GetCurrentProcess();
+	DWORD cPID = GetCurrentProcessId();
+	ProcessIdToSessionId(cPID, &session);
+	getIntegrity(cPID, &integrity);
+	printf("\n[+] Current PID:               %d\n", cPID);
+	printf("[+] Current Process Integrity: %s\n", integrity);
+	printf("[+] Current Process Session:   %d\n", session);
 	
 	CloseHandle( hSnapshot );
 	
@@ -216,6 +299,7 @@ int main( int argc, char *argv[] ) {
 
 	printf("\nFoundstone DLL Injector v%1.1f (%s)\n", VERSION, tcArch);
 	printf("brad.antoniewicz@foundstone.com\n");
+	printf("process listing enhancements by Josh Stone (yakovdk@gmail.com)\n");
 	printf("--------------------------------------------------------\n");
 
 	for (dwCount=1; dwCount < (DWORD)argc; dwCount++) {
